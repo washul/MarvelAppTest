@@ -1,29 +1,31 @@
 package com.wsl.marvelapptest.ui
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import com.wsl.domain.characters.models.CharacterEntity
 import com.wsl.marvelapptest.R
+import com.wsl.marvelapptest.databinding.CharacterHomeListCardViewBinding
 import kotlinx.android.synthetic.main.character_home_list_card_view.view.*
-import java.lang.Exception
 
-class CharactersListAdapter: ListAdapter<CharacterEntity, CharactersListAdapter.ItemViewHolder>(CustomDiffUtils()) {
+class CharactersListAdapter(private val onItemClick: (id: Int) -> Unit):
+    ListAdapter<CharacterEntity, CharactersListAdapter.ItemViewHolder>(CustomDiffUtils()) {
 
-    class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    private lateinit var binding: CharacterHomeListCardViewBinding
+
+    class ItemViewHolder(private val binding: CharacterHomeListCardViewBinding) :
+        RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: CharacterEntity) = with(itemView) {
-            this.characterName.text = item.name
+            binding.item = item
             val path = "${item.thumbnail.path}.${item.thumbnail.extension}"
             Picasso.get()
                 .load(path)
+                .fit()
                 .placeholder(R.drawable.placeholder)
                 .into(this.characterImage)
         }
@@ -31,18 +33,21 @@ class CharactersListAdapter: ListAdapter<CharacterEntity, CharactersListAdapter.
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
-        viewType: Int): ItemViewHolder =
-        ItemViewHolder(
-            LayoutInflater
-                .from(parent.context)
-                .inflate(
-                    R.layout.character_home_list_card_view,
-                    parent,
-                    false
-                )
-        )
+        viewType: Int): ItemViewHolder {
+        binding = CharacterHomeListCardViewBinding
+            .inflate(
+                LayoutInflater
+                    .from(
+                        parent.context
+                    ),
+                parent,
+                false
+            )
+        return ItemViewHolder(binding)
+    }
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
+        holder.itemView.setOnClickListener { onItemClick(getItem(position).id) }
         holder.bind(getItem(position))
     }
 

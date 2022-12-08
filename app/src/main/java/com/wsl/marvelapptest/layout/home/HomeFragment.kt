@@ -1,45 +1,30 @@
 package com.wsl.marvelapptest.layout.home
 
-import android.os.Bundle
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.wsl.marvelapptest.R
+import com.wsl.marvelapptest.base.BaseViewModelFragment
+import com.wsl.marvelapptest.common.layout.LayoutFragment
 import com.wsl.marvelapptest.databinding.FragmentHomeBinding
 import com.wsl.marvelapptest.ui.CharactersListAdapter
 import kotlinx.android.synthetic.main.fragment_home.view.*
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 /**
  * A simple [Fragment] subclass.
  * Use the [HomeFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class HomeFragment : Fragment() {
+@LayoutFragment(R.layout.fragment_home)
+class HomeFragment : BaseViewModelFragment<FragmentHomeBinding, HomeViewModel> (
+    HomeViewModel::class) {
 
-    val viewModel: HomeViewModel by viewModel(clazz = HomeViewModel::class)
+    private lateinit var listAdapter: CharactersListAdapter
 
-    private val listAdapter = CharactersListAdapter()
-    private lateinit var binding: FragmentHomeBinding
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentHomeBinding.inflate(inflater, container, false)
+    override fun subscribeToViewModel(viewModel: HomeViewModel) {
         createRecycler()
 
-        viewModel.getAllCharacters()
-        setObservers()
-
-        // Inflate the layout for this fragment
-        return binding.root
-    }
-
-    private fun setObservers() {
         //CharacterList
         viewModel.charactersList.observe(viewLifecycleOwner) {
             listAdapter.submitList(it)
@@ -51,9 +36,12 @@ class HomeFragment : Fragment() {
     }
 
     private fun createRecycler() {
+        listAdapter = CharactersListAdapter { itemId ->
+            goToDetails(itemId)
+        }
         binding.root.homeCharactersList.apply {
             adapter = listAdapter
-            layoutManager = GridLayoutManager(context, 2)
+            layoutManager = GridLayoutManager(context, 1)
         }.addOnScrollListener(object: RecyclerView.OnScrollListener(){
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
@@ -63,6 +51,10 @@ class HomeFragment : Fragment() {
                 }
             }
         })
+    }
+
+    private fun goToDetails(id: Int) {
+        navController.navigate(HomeFragmentDirections.actionHomeFragmentToDetailsFragment(id))
     }
 
     private fun showLoading(show: Boolean ){

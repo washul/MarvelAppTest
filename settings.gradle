@@ -1,0 +1,5 @@
+rootProject.name = "MarvelAppTest"
+include ':app'
+include ':utils'
+include ':domain'
+include ':data'

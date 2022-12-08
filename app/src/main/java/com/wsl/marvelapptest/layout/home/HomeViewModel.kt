@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wsl.domain.characters.models.CharacterEntity
 import com.wsl.domain.characters.usecases.GetAllCharactersUseCase
+import com.wsl.marvelapptest.base.BaseViewModel
+import com.wsl.marvelapptest.common.ThemeConfigManagement
 import com.wsl.marvelapptest.utils.addList
 import com.wsl.utils.onFailure
 import com.wsl.utils.onSuccess
@@ -13,8 +15,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
-    private val getAllCharactersUseCase: GetAllCharactersUseCase
-): ViewModel() {
+    private val getAllCharactersUseCase: GetAllCharactersUseCase,
+    themeConfigManagement: ThemeConfigManagement
+): BaseViewModel(
+    themeConfigManagement
+) {
 
     private val mutableCharactersList = MutableLiveData<List<CharacterEntity>>(emptyList())
     var charactersList = mutableCharactersList
@@ -25,8 +30,11 @@ class HomeViewModel(
     private var offsetItemCount = 0
     private val limitCharactersItems = 10
 
-    fun getAllCharacters() {
+    init {
+        getAllCharacters()
+    }
 
+    fun getAllCharacters() {
         mutableShowLoading.postValue(true)
         offsetItemCount += mutableCharactersList.value!!.size
 
